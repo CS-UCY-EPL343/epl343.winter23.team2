@@ -1,0 +1,536 @@
+USE [epl343]
+GO
+/****** Object:  StoredProcedure [dbo].[UpdateMatchComp]    Script Date: 28/11/2023 11:42:25 ******/
+DROP PROCEDURE IF EXISTS [dbo].[UpdateMatchComp]
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[matches]') AND type in (N'U'))
+ALTER TABLE [dbo].[matches] DROP CONSTRAINT IF EXISTS [FK_Matches_Teams2]
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[matches]') AND type in (N'U'))
+ALTER TABLE [dbo].[matches] DROP CONSTRAINT IF EXISTS [FK_Matches_Teams1]
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[bets]') AND type in (N'U'))
+ALTER TABLE [dbo].[bets] DROP CONSTRAINT IF EXISTS [FK_Bets_Matches]
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[bets]') AND type in (N'U'))
+ALTER TABLE [dbo].[bets] DROP CONSTRAINT IF EXISTS [FK_Bets_BetTickets]
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[bet_tickets]') AND type in (N'U'))
+ALTER TABLE [dbo].[bet_tickets] DROP CONSTRAINT IF EXISTS [FK_BetTickets_Users]
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[available_bets]') AND type in (N'U'))
+ALTER TABLE [dbo].[available_bets] DROP CONSTRAINT IF EXISTS [FK_AvailableBets_Matches]
+GO
+/****** Object:  Table [dbo].[users]    Script Date: 28/11/2023 11:42:25 ******/
+DROP TABLE IF EXISTS [dbo].[users]
+GO
+/****** Object:  Table [dbo].[teams]    Script Date: 28/11/2023 11:42:25 ******/
+DROP TABLE IF EXISTS [dbo].[teams]
+GO
+/****** Object:  Table [dbo].[matches]    Script Date: 28/11/2023 11:42:25 ******/
+DROP TABLE IF EXISTS [dbo].[matches]
+GO
+/****** Object:  Table [dbo].[bets]    Script Date: 28/11/2023 11:42:25 ******/
+DROP TABLE IF EXISTS [dbo].[bets]
+GO
+/****** Object:  Table [dbo].[bet_tickets]    Script Date: 28/11/2023 11:42:25 ******/
+DROP TABLE IF EXISTS [dbo].[bet_tickets]
+GO
+/****** Object:  Table [dbo].[available_bets]    Script Date: 28/11/2023 11:42:25 ******/
+DROP TABLE IF EXISTS [dbo].[available_bets]
+GO
+USE [master]
+GO
+/****** Object:  Database [epl343]    Script Date: 28/11/2023 11:42:25 ******/
+DROP DATABASE IF EXISTS [epl343]
+GO
+/****** Object:  Database [epl343]    Script Date: 28/11/2023 11:42:25 ******/
+CREATE DATABASE [epl343]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'epl343', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\epl343.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'epl343_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\epl343_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
+GO
+ALTER DATABASE [epl343] SET COMPATIBILITY_LEVEL = 160
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [epl343].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [epl343] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [epl343] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [epl343] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [epl343] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [epl343] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [epl343] SET AUTO_CLOSE ON 
+GO
+ALTER DATABASE [epl343] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [epl343] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [epl343] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [epl343] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [epl343] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [epl343] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [epl343] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [epl343] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [epl343] SET  ENABLE_BROKER 
+GO
+ALTER DATABASE [epl343] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [epl343] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [epl343] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [epl343] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [epl343] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [epl343] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [epl343] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [epl343] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [epl343] SET  MULTI_USER 
+GO
+ALTER DATABASE [epl343] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [epl343] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [epl343] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [epl343] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [epl343] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [epl343] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+ALTER DATABASE [epl343] SET QUERY_STORE = ON
+GO
+ALTER DATABASE [epl343] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+USE [epl343]
+GO
+/****** Object:  Table [dbo].[available_bets]    Script Date: 28/11/2023 11:42:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[available_bets](
+	[Specif] [varchar](20) NOT NULL,
+	[matchid] [int] NOT NULL,
+	[abetid] [int] NOT NULL,
+	[odds] [float] NOT NULL,
+	[win_loss_pending] [varchar](20) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[abetid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[bet_tickets]    Script Date: 28/11/2023 11:42:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[bet_tickets](
+	[the_date] [date] NOT NULL,
+	[ticket_number] [int] IDENTITY(1,1) NOT NULL,
+	[stake] [float] NOT NULL,
+	[total_odds] [float] NOT NULL,
+	[the_user] [varchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ticket_number] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[bets]    Script Date: 28/11/2023 11:42:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[bets](
+	[odds] [float] NOT NULL,
+	[betid] [int] IDENTITY(1,1) NOT NULL,
+	[win_loss_pending] [varchar](20) NOT NULL,
+	[specification] [varchar](20) NOT NULL,
+	[match_played] [int] NOT NULL,
+	[bet_ticket] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[betid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[matches]    Script Date: 28/11/2023 11:42:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[matches](
+	[date_of_the_match] [date] NOT NULL,
+	[id] [int] NOT NULL,
+	[team1] [varchar](50) NOT NULL,
+	[team2] [varchar](50) NOT NULL,
+	[match_comp] [nvarchar](50) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[teams]    Script Date: 28/11/2023 11:42:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[teams](
+	[Name] [varchar](50) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[users]    Script Date: 28/11/2023 11:42:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[users](
+	[name] [varchar](50) NOT NULL,
+	[surname] [varchar](50) NOT NULL,
+	[password] [varchar](50) NOT NULL,
+	[phone] [int] NOT NULL,
+	[Email] [varchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Email] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'over 2.5', 1, 1, 1.5, N'won')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'Home_win', 2, 2, 1.5, N'lost')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'under 2.5', 3, 3, 1.5, N'won')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'under 2.5', 4, 4, 1.5, N'lost')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'Bet5', 5, 5, 1.5, N'won')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'Bet6', 6, 6, 1.5, N'lost')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'Bet7', 7, 7, 1.5, N'won')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'Bet8', 8, 8, 1.5, N'lost')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'Bet9', 9, 9, 1.5, N'won')
+GO
+INSERT [dbo].[available_bets] ([Specif], [matchid], [abetid], [odds], [win_loss_pending]) VALUES (N'Bet10', 10, 10, 1.5, N'lost')
+GO
+SET IDENTITY_INSERT [dbo].[bet_tickets] ON 
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-01' AS Date), 1, 50, 2, N'john@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-02' AS Date), 2, 30, 1.5, N'alice@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-03' AS Date), 3, 20, 3, N'bob@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-04' AS Date), 4, 40, 2.2, N'eva@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-05' AS Date), 5, 25, 1.7, N'david@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-06' AS Date), 6, 35, 2.8, N'sophia@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-07' AS Date), 7, 15, 1.9, N'james@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-08' AS Date), 8, 28, 2.1, N'olivia@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-09' AS Date), 9, 10, 1.8, N'liam@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-01-10' AS Date), 10, 45, 2.5, N'emma@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-22' AS Date), 11, 0, 0, N'john@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-22' AS Date), 12, 10, 30, N'john@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-22' AS Date), 13, 3, 9, N'john@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-22' AS Date), 14, 3, 9, N'john@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-22' AS Date), 15, 5, 15, N'alice.j@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-22' AS Date), 16, 10, 45, N'alice.j@example.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-23' AS Date), 21, 10, 45, N'christodoulos@email.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-27' AS Date), 22, 3, 13.5, N'gamias69@gmail.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-27' AS Date), 23, 10, 30, N'gamias69@gmail.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-27' AS Date), 26, 69, 414, N'kendeas@email.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-27' AS Date), 27, 2, 6, N'kendeas@email.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-27' AS Date), 28, 5, 15, N'kendeas@email.com')
+GO
+INSERT [dbo].[bet_tickets] ([the_date], [ticket_number], [stake], [total_odds], [the_user]) VALUES (CAST(N'2023-11-27' AS Date), 29, 5, 15, N'kendeas@email.com')
+GO
+SET IDENTITY_INSERT [dbo].[bet_tickets] OFF
+GO
+SET IDENTITY_INSERT [dbo].[bets] ON 
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (2.5, 1, N'Win', N'Spec1', 1, 1)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.8, 2, N'Loss', N'Spec2', 2, 2)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (3, 3, N'Pending', N'Spec3', 3, 3)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (2.2, 4, N'Win', N'Spec4', 4, 4)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 5, N'Loss', N'Spec5', 5, 5)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (2.8, 6, N'Win', N'Spec6', 6, 6)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.9, 7, N'Loss', N'Spec7', 7, 7)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (2.1, 8, N'Win', N'Spec8', 8, 8)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.7, 9, N'Loss', N'Spec9', 9, 9)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (2.4, 10, N'Pending', N'Spec10', 10, 10)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 12, N'open', N'Bet5', 5, 12)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 13, N'open', N'Bet1', 1, 12)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 14, N'open', N'Bet9', 9, 13)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 15, N'open', N'Bet2', 2, 13)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 16, N'open', N'Bet7', 7, 14)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 17, N'open', N'Bet1', 1, 14)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 18, N'open', N'Bet1', 1, 15)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 19, N'open', N'Bet10', 10, 15)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 20, N'open', N'Bet5', 5, 16)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 21, N'open', N'Bet9', 9, 16)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 22, N'open', N'Bet10', 10, 16)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 33, N'open', N'Bet1', 1, 21)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 34, N'open', N'Bet9', 9, 21)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 35, N'open', N'Bet2', 2, 21)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 36, N'open', N'Bet1', 1, 22)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 37, N'open', N'Bet4', 4, 22)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 38, N'open', N'Bet9', 9, 22)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 39, N'open', N'Bet8', 8, 23)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 40, N'open', N'Bet9', 9, 23)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 46, N'won', N'over 2.5', 1, 26)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 47, N'lost', N'Home_win', 2, 26)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 48, N'won', N'under 2.5', 3, 26)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 49, N'lost', N'under 2.5', 4, 26)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 50, N'won', N'over 2.5', 1, 27)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 51, N'won', N'under 2.5', 3, 27)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 52, N'won', N'Bet9', 9, 28)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 53, N'lost', N'Bet10', 10, 28)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 54, N'won', N'Bet7', 7, 29)
+GO
+INSERT [dbo].[bets] ([odds], [betid], [win_loss_pending], [specification], [match_played], [bet_ticket]) VALUES (1.5, 55, N'won', N'over 2.5', 1, 29)
+GO
+SET IDENTITY_INSERT [dbo].[bets] OFF
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-01' AS Date), 1, N'Team A', N'Team B', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-02' AS Date), 2, N'Team C', N'Team D', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-03' AS Date), 3, N'Team E', N'Team F', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-04' AS Date), 4, N'Team G', N'Team H', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-05' AS Date), 5, N'Team I', N'Team J', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-06' AS Date), 6, N'Team B', N'Team C', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-07' AS Date), 7, N'Team D', N'Team E', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-08' AS Date), 8, N'Team F', N'Team G', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-09' AS Date), 9, N'Team H', N'Team I', NULL)
+GO
+INSERT [dbo].[matches] ([date_of_the_match], [id], [team1], [team2], [match_comp]) VALUES (CAST(N'2023-01-10' AS Date), 10, N'Team J', N'Team A', NULL)
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team A')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team B')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team C')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team D')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team E')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team F')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team G')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team H')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team I')
+GO
+INSERT [dbo].[teams] ([Name]) VALUES (N'Team J')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Alice', N'Johnson', N'securePass123', 2147483647, N'alice.j@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Alice', N'Smith', N'password2', 2147483647, N'alice@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Alice', N'Johnson', N'securePass123', 2147483647, N'alice1.j@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Alice', N'Johnson', N'securePass123', 2147483647, N'alice2.j@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'axileas', N'dienomenou', N'axileas', 99836435, N'axileas@gmail.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Bob', N'Smith', N'P@ssw0rd!', 2147483647, N'bo1b.smith@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Bob', N'Smith', N'P@ssw0rd!', 2147483647, N'bob.smith@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Bob', N'Johnson', N'password3', 2147483647, N'bob@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Christodoulos', N'Evangelou', N'christodoulos1234', 99876545, N'christodoulos@email.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'David', N'Williams', N'D@v!dPass', 2147483647, N'davi3d.w@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'David', N'Williams', N'D@v!dPass', 2147483647, N'david.w@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'David', N'Miller', N'password5', 2147483647, N'david@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Ella', N'Brown', N'SecretPassw0rd', 1234567890, N'ell2a.b@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Ella', N'Brown', N'SecretPassw0rd', 1234567890, N'ella.b@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Emma', N'Moore', N'password10', 1122334455, N'emma@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Eva', N'Williams', N'password4', 2147483647, N'eva@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'nektarios', N'kolokotronis', N'gamias69', 69696969, N'gamias69@gmail.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Giorgos', N'Dimitriou', N'giorgos1234', 99873823, N'giorgos@email.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'ioanna', N'xidia', N'123', 97725142, N'ioanna@gmail.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'James', N'Anderson', N'password7', 2147483647, N'james@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'John', N'Doe', N'password1', 1234567890, N'john@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Kendeas', N'Dimitriou', N'kendeas11', 97878705, N'kendeas@email.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Kendeas', N'Dimitriou', N'securePass123456', 9734231, N'kendeas12@email.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Liam', N'Davis', N'password9', 2147483647, N'liam@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Nektarios', N'Kolokotronis', N'1234', 99876452, N'Nektarios@email.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Olivia', N'Taylor', N'password8', 2147483647, N'olivia@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Sophia', N'Lee', N'Secure123!', 2147483647, N'sophi4a.lee@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Sophia', N'Lee', N'Secure123!', 2147483647, N'sophia.lee@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Sophia', N'Brown', N'password6', 2147483647, N'sophia@example.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Mixalis', N'Xydias', N'Xithkias1234', 98902312, N'Xithkias123@email.com')
+GO
+INSERT [dbo].[users] ([name], [surname], [password], [phone], [Email]) VALUES (N'Zinonas', N'Kortas', N'secure1234', 99890723, N'zinon@email.com')
+GO
+ALTER TABLE [dbo].[available_bets]  WITH CHECK ADD  CONSTRAINT [FK_AvailableBets_Matches] FOREIGN KEY([matchid])
+REFERENCES [dbo].[matches] ([id])
+GO
+ALTER TABLE [dbo].[available_bets] CHECK CONSTRAINT [FK_AvailableBets_Matches]
+GO
+ALTER TABLE [dbo].[bet_tickets]  WITH CHECK ADD  CONSTRAINT [FK_BetTickets_Users] FOREIGN KEY([the_user])
+REFERENCES [dbo].[users] ([Email])
+GO
+ALTER TABLE [dbo].[bet_tickets] CHECK CONSTRAINT [FK_BetTickets_Users]
+GO
+ALTER TABLE [dbo].[bets]  WITH CHECK ADD  CONSTRAINT [FK_Bets_BetTickets] FOREIGN KEY([bet_ticket])
+REFERENCES [dbo].[bet_tickets] ([ticket_number])
+GO
+ALTER TABLE [dbo].[bets] CHECK CONSTRAINT [FK_Bets_BetTickets]
+GO
+ALTER TABLE [dbo].[bets]  WITH CHECK ADD  CONSTRAINT [FK_Bets_Matches] FOREIGN KEY([match_played])
+REFERENCES [dbo].[matches] ([id])
+GO
+ALTER TABLE [dbo].[bets] CHECK CONSTRAINT [FK_Bets_Matches]
+GO
+ALTER TABLE [dbo].[matches]  WITH CHECK ADD  CONSTRAINT [FK_Matches_Teams1] FOREIGN KEY([team1])
+REFERENCES [dbo].[teams] ([Name])
+GO
+ALTER TABLE [dbo].[matches] CHECK CONSTRAINT [FK_Matches_Teams1]
+GO
+ALTER TABLE [dbo].[matches]  WITH CHECK ADD  CONSTRAINT [FK_Matches_Teams2] FOREIGN KEY([team2])
+REFERENCES [dbo].[teams] ([Name])
+GO
+ALTER TABLE [dbo].[matches] CHECK CONSTRAINT [FK_Matches_Teams2]
+GO
+/****** Object:  StoredProcedure [dbo].[UpdateMatchComp]    Script Date: 28/11/2023 11:42:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[UpdateMatchComp]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE [epl343].[dbo].[matches]
+    SET match_comp = SUBSTRING(team1, 1, 3) + ' - ' + SUBSTRING(team2, 1, 3)
+    WHERE match_comp IS NULL;
+
+END;
+GO
+USE [master]
+GO
+ALTER DATABASE [epl343] SET  READ_WRITE 
+GO
